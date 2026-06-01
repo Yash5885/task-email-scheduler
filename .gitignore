@@ -1,0 +1,6 @@
+data/settings.json
+data/sent-reminders.json
+data/*.sqlite
+data/*.sqlite-shm
+data/*.sqlite-wal
+*.log

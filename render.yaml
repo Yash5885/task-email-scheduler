@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: task-email-scheduler
+    runtime: node
+    plan: starter
+    buildCommand: ''
+    startCommand: node server-cloud.js
+    disk:
+      name: scheduler-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: 24
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: COMPANY_SMTP_HOST
+        value: smtp.gmail.com
+      - key: COMPANY_SMTP_PORT
+        value: 465
+      - key: COMPANY_SMTP_USER
+        value: yashamantrial@gmail.com
+      - key: COMPANY_SMTP_PASSWORD
+        sync: false
+      - key: COMPANY_EMAIL_FROM
+        value: yashamantrial@gmail.com

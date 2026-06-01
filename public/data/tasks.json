@@ -1,0 +1,283 @@
+[
+  {
+    "id": "reset",
+    "start": "00:15",
+    "end": "00:45",
+    "title": "Prepare for study",
+    "category": "Reset",
+    "focus": "Clean desk, decide questions for the next session, and keep the phone away.",
+    "checklist": [
+      "Clean desk",
+      "Choose tomorrow's revision and new questions",
+      "Keep phone away"
+    ]
+  },
+  {
+    "id": "setup",
+    "start": "00:45",
+    "end": "01:00",
+    "title": "Setup",
+    "category": "Study",
+    "focus": "Sit at your study place, keep water nearby, and open only what you need.",
+    "checklist": [
+      "Write today's DSA goal",
+      "Pick 2 old questions",
+      "Pick 2 new questions"
+    ]
+  },
+  {
+    "id": "revision-block",
+    "start": "01:00",
+    "end": "02:00",
+    "title": "Revise 2 old DSA questions",
+    "category": "DSA",
+    "focus": "Build confidence first by revising old questions before attempting anything new.",
+    "checklist": [
+      "Read the question",
+      "Explain the approach out loud",
+      "Code without seeing the solution",
+      "Check your old mistake"
+    ]
+  },
+  {
+    "id": "new-dsa-1",
+    "start": "02:00",
+    "end": "03:15",
+    "title": "New DSA Question 1",
+    "category": "DSA",
+    "focus": "Think first, use hints carefully, then code and write a short pattern note.",
+    "checklist": [
+      "25 min: think and write brute force",
+      "20 min: check hint or editorial",
+      "30 min: code yourself",
+      "Write Problem, Pattern, Mistake"
+    ]
+  },
+  {
+    "id": "night-break",
+    "start": "03:15",
+    "end": "03:35",
+    "title": "Break",
+    "category": "Break",
+    "focus": "Walk, drink water, maybe eat something light. Keep reels and YouTube closed.",
+    "checklist": [
+      "Move around",
+      "Drink water",
+      "Use a timer"
+    ]
+  },
+  {
+    "id": "new-dsa-2",
+    "start": "03:35",
+    "end": "04:50",
+    "title": "New DSA Question 2",
+    "category": "DSA",
+    "focus": "Repeat the same careful process. Two new questions per day is enough.",
+    "checklist": [
+      "Think before checking hints",
+      "Code yourself",
+      "Write Problem, Pattern, Mistake"
+    ]
+  },
+  {
+    "id": "pattern-notebook",
+    "start": "04:50",
+    "end": "05:20",
+    "title": "Pattern notebook",
+    "category": "Notes",
+    "focus": "Make the learning permanent by recording patterns, mistakes, and tomorrow's revision.",
+    "checklist": [
+      "Date",
+      "Questions solved",
+      "Patterns learned",
+      "Mistakes made",
+      "Tomorrow revision"
+    ]
+  },
+  {
+    "id": "challenge-github-rough",
+    "start": "05:20",
+    "end": "06:00",
+    "title": "Challenge / GitHub rough work",
+    "category": "Challenge",
+    "focus": "Pick an easy question connected to what you studied and explain it in your own words.",
+    "checklist": [
+      "Draft today's learning",
+      "Mention the mistake fixed",
+      "Prepare GitHub link"
+    ]
+  },
+  {
+    "id": "walk",
+    "start": "06:00",
+    "end": "06:45",
+    "title": "Walk + mental revision",
+    "category": "Health",
+    "focus": "Use the walk for light mental revision, not heavy content.",
+    "checklist": [
+      "Recall what you solved",
+      "Name the pattern",
+      "Recall the mistake",
+      "Explain it like an interview answer"
+    ]
+  },
+  {
+    "id": "breakfast",
+    "start": "06:45",
+    "end": "07:15",
+    "title": "Breakfast",
+    "category": "Personal",
+    "focus": "Eat, freshen up, and avoid getting stuck there if sleep is pending.",
+    "checklist": [
+      "Eat",
+      "Freshen up",
+      "Return on time"
+    ]
+  },
+  {
+    "id": "main-sleep",
+    "start": "07:15",
+    "end": "13:30",
+    "title": "Main sleep",
+    "category": "Sleep",
+    "focus": "Room dark, phone away, no guilt. Sleep is part of the study plan.",
+    "checklist": [
+      "Phone away",
+      "Room dark",
+      "Sleep without guilt"
+    ]
+  },
+  {
+    "id": "wake-reset",
+    "start": "13:30",
+    "end": "14:00",
+    "title": "Wake/reset",
+    "category": "Reset",
+    "focus": "Wake up properly before touching the phone.",
+    "checklist": [
+      "Wash face",
+      "Drink water",
+      "Make bed",
+      "Light stretching"
+    ]
+  },
+  {
+    "id": "lunch",
+    "start": "14:00",
+    "end": "15:00",
+    "title": "Lunch",
+    "category": "Personal",
+    "focus": "Have your meal and avoid letting it become several hours of random timepass.",
+    "checklist": [
+      "Eat",
+      "Spend limited time",
+      "Return for light study"
+    ]
+  },
+  {
+    "id": "placement-study",
+    "start": "15:00",
+    "end": "16:00",
+    "title": "Java / OOPs / SQL / placement subject",
+    "category": "Placement",
+    "focus": "Use this for a lighter placement topic instead of heavy DSA.",
+    "checklist": [
+      "Mon/Wed/Fri: Java + OOPs",
+      "Tue/Thu/Sat: SQL/DBMS",
+      "Sun: weekly revision"
+    ]
+  },
+  {
+    "id": "evening-break",
+    "start": "16:00",
+    "end": "16:30",
+    "title": "Break",
+    "category": "Break",
+    "focus": "Free time, tea, snack, or rest.",
+    "checklist": [
+      "Take a real break",
+      "Return by 4:30 PM"
+    ]
+  },
+  {
+    "id": "reattempt",
+    "start": "16:30",
+    "end": "17:30",
+    "title": "DSA re-attempt block",
+    "category": "DSA",
+    "focus": "Pick one question solved at night and solve it again without seeing code.",
+    "checklist": [
+      "Pick one night question",
+      "Solve without code",
+      "Open notes only if stuck",
+      "Code again"
+    ]
+  },
+  {
+    "id": "flexible",
+    "start": "17:30",
+    "end": "19:00",
+    "title": "Flexible / rest",
+    "category": "Personal",
+    "focus": "Family time, shower, college work, pending tasks, or relaxation. Keep naps short.",
+    "checklist": [
+      "Handle pending tasks",
+      "Avoid 3-4 hour sleep",
+      "Limit nap to 25 minutes if needed"
+    ]
+  },
+  {
+    "id": "dinner",
+    "start": "19:00",
+    "end": "20:00",
+    "title": "Dinner / family",
+    "category": "Personal",
+    "focus": "Keep it light and relaxed.",
+    "checklist": [
+      "Eat dinner",
+      "Relax with family"
+    ]
+  },
+  {
+    "id": "challenge-post",
+    "start": "20:00",
+    "end": "21:00",
+    "title": "LinkedIn / GitHub challenge post",
+    "category": "Challenge",
+    "focus": "Finalize the GitHub commit, LinkedIn post, notes screenshot, and challenge update.",
+    "checklist": [
+      "Commit to GitHub",
+      "Write LinkedIn post",
+      "Add final approach",
+      "Add GitHub link"
+    ]
+  },
+  {
+    "id": "relax",
+    "start": "21:00",
+    "end": "23:00",
+    "title": "Rest / personal time",
+    "category": "Personal",
+    "focus": "Guilt-free relaxation with a limit so you do not burn out.",
+    "checklist": [
+      "Relax",
+      "Keep a limit",
+      "Protect the 11 PM warmup"
+    ]
+  },
+  {
+    "id": "pre-study-warmup",
+    "start": "23:00",
+    "end": "24:15",
+    "title": "Light concept revision",
+    "category": "Study",
+    "focus": "Do not start a hard new question. Warm up with concepts, notes, dry runs, or one pattern.",
+    "checklist": [
+      "Watch one concept video",
+      "Read tomorrow's topics",
+      "Revise notes",
+      "Dry-run code",
+      "Understand one pattern"
+    ]
+  }
+]
