@@ -123,6 +123,20 @@ async function handleApi(request, response, url) {
     return true;
   }
 
+  if (request.method === 'GET' && url.pathname === '/api/email-diagnostics') {
+    sendJson(response, 200, {
+      configured: isSmtpConfigured(),
+      host: smtpSettings.host,
+      port: smtpSettings.port,
+      user: maskEmail(smtpSettings.user),
+      from: maskEmail(smtpSettings.from),
+      passwordPresent: Boolean(smtpSettings.password),
+      passwordLength: smtpSettings.password.length,
+      passwordLooksLikeGmailAppPassword: smtpSettings.password.length === 16
+    });
+    return true;
+  }
+
   if (request.method === 'POST' && url.pathname === '/api/auth/google') {
     const body = await readJsonBody(request);
     const profile = await verifyGoogleCredential(body.credential);
@@ -193,22 +207,26 @@ async function handleApi(request, response, url) {
   if (request.method === 'POST' && url.pathname === '/api/send-test-email') {
     const userId = requireSession(request);
     const user = db.prepare('SELECT id, email, name FROM users WHERE id = ?').get(userId);
-    ensureSmtpConfigured();
-    await sendSmtpMail({
-      from: smtpSettings.from,
-      to: user.email,
-      username: smtpSettings.user,
-      password: smtpSettings.password,
-      subject: 'Task Email Scheduler test email',
-      body: [
-        `Hi ${user.name || user.email},`,
-        '',
-        'This is a test email from Task Email Scheduler.',
-        '',
-        'Your task reminders will arrive here when a task is about to start.'
-      ].join('\n')
-    });
-    sendJson(response, 200, { ok: true });
+    try {
+      ensureSmtpConfigured();
+      await sendSmtpMail({
+        from: smtpSettings.from,
+        to: user.email,
+        username: smtpSettings.user,
+        password: smtpSettings.password,
+        subject: 'Task Email Scheduler test email',
+        body: [
+          `Hi ${user.name || user.email},`,
+          '',
+          'This is a test email from Task Email Scheduler.',
+          '',
+          'Your task reminders will arrive here when a task is about to start.'
+        ].join('\n')
+      });
+      sendJson(response, 200, { ok: true });
+    } catch (error) {
+      sendJson(response, 400, { error: friendlyEmailError(error) });
+    }
     return true;
   }
 
@@ -606,6 +624,13 @@ function isSmtpConfigured() {
   return Boolean(smtpSettings.user && smtpSettings.password && smtpSettings.from);
 }
 
+function maskEmail(email) {
+  const value = String(email || '');
+  const [name, domain] = value.split('@');
+  if (!name || !domain) return value ? 'configured' : '';
+  return `${name.slice(0, 2)}***@${domain}`;
+}
+
 function ensureSmtpConfigured() {
   if (isSmtpConfigured()) return;
   const error = new Error(
@@ -613,6 +638,28 @@ function ensureSmtpConfigured() {
   );
   error.statusCode = 400;
   throw error;
+}
+
+function friendlyEmailError(error) {
+  const message = String(error && error.message ? error.message : error);
+
+  if (message.includes('SMTP 535') || message.includes('BadCredentials')) {
+    return 'Company Gmail rejected the login. Create a fresh app password for yashamantrial@gmail.com, set it as COMPANY_SMTP_PASSWORD in Render, and redeploy.';
+  }
+
+  if (message.includes('Username and Password not accepted')) {
+    return 'Company Gmail rejected the SMTP username/password. Make sure COMPANY_SMTP_USER is yashamantrial@gmail.com and COMPANY_SMTP_PASSWORD is a fresh Gmail app password.';
+  }
+
+  if (message.includes('Could not connect')) {
+    return `${message}. Render may not be able to reach the SMTP host/port, or the SMTP host/port is wrong.`;
+  }
+
+  if (message.includes('Company sender is not configured')) {
+    return message;
+  }
+
+  return `Email send failed: ${message}`;
 }
 
 function remindersDueForUser(user, now) {
