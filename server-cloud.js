@@ -1,6 +1,3 @@
-Replace your entire `server-cloud.js` with this:
-
-```js
 'use strict';
 
 const crypto = require('crypto');
@@ -1037,4 +1034,3 @@ function mimeType(filePath) {
     }[path.extname(filePath).toLowerCase()] || 'application/octet-stream'
   );
 }
-```
