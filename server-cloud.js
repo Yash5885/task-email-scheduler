@@ -1,5 +1,5 @@
 'use strict';
-
+const dns = require('dns');
 const crypto = require('crypto');
 const fs = require('fs');
 const http = require('http');
