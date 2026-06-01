@@ -775,11 +775,14 @@ function dotStuff(body) {
 
 async function sendSmtpMail({ from, to, username, password, subject, body }) {
   const socket = tls.connect({
-    host: smtpSettings.host,
-    port: smtpSettings.port,
-    servername: smtpSettings.host,
-    rejectUnauthorized: true
-  });
+  host: smtpSettings.host,
+  port: smtpSettings.port,
+  servername: smtpSettings.host,
+  rejectUnauthorized: true,
+  lookup(hostname, options, callback) {
+    dns.lookup(hostname, { family: 4 }, callback);
+  }
+});
   const reader = createSmtpReader(socket);
 
   await new Promise((resolve, reject) => {
