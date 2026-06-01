@@ -1,0 +1,15 @@
+{
+  "name": "dsa-reminder-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Daily DSA schedule website with Gmail reminders 15 minutes before tasks.",
+  "main": "server-cloud.js",
+  "scripts": {
+    "start": "node server-cloud.js",
+    "start:personal": "node server.js",
+    "start:cloud": "node server-cloud.js"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
