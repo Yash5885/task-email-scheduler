@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Task Email Scheduler</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="platform.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <span class="eyebrow">Task Email Scheduler</span>
+        <h1>Your synced task schedule</h1>
+      </div>
+      <div id="accountArea" class="account-area"></div>
+    </header>
+
+    <main class="shell">
+      <section id="signedOut" class="auth-panel">
+        <div>
+          <span class="eyebrow">Gmail sign in</span>
+          <h2>Sign in once. Get reminders on that Gmail.</h2>
+          <p>
+            Every user gets their own schedule, timings, and reminders. Emails are sent from the
+            company mail account configured on the server.
+          </p>
+        </div>
+        <div id="googleButton"></div>
+        <form id="devLoginForm" class="dev-login hidden">
+          <label>
+            Dev email
+            <input id="devEmail" type="email" placeholder="you@gmail.com" />
+          </label>
+          <button type="submit">Use dev login</button>
+        </form>
+        <p id="authMessage" class="message-line"></p>
+      </section>
+
+      <section id="signedIn" class="dashboard hidden">
+        <section class="focus-panel">
+          <div class="panel-heading">
+            <span class="eyebrow">Current block</span>
+            <span id="currentTime" class="time-range">--</span>
+          </div>
+          <h2 id="currentTitle">No active task</h2>
+          <p id="currentFocus"></p>
+          <div class="progress-track"><span id="progressBar"></span></div>
+          <div class="next-row">
+            <div>
+              <span class="eyebrow">Next reminder</span>
+              <strong id="nextTitle">--</strong>
+            </div>
+            <div class="countdown">
+              <span id="countdownValue">--</span>
+              <small id="nextTime">--</small>
+            </div>
+          </div>
+        </section>
+
+        <aside class="settings-panel">
+          <div class="panel-heading">
+            <span class="eyebrow">Reminder settings</span>
+            <span id="syncState" class="muted">Synced</span>
+          </div>
+          <label class="toggle-line">
+            <input id="enabled" type="checkbox" />
+            <span>Email reminders on</span>
+          </label>
+          <label>
+            Minutes before task
+            <input id="leadMinutes" type="number" min="1" max="120" />
+          </label>
+          <label>
+            Time zone
+            <input id="timeZone" type="text" />
+          </label>
+          <p class="message-line">
+            Mail goes to your signed-in Gmail from the company sender. No user has to enter sender
+            email settings.
+          </p>
+          <p id="companyEmailStatus" class="message-line"></p>
+          <button id="saveSchedule" type="button">Save changes</button>
+          <button id="sendTestEmail" class="secondary-button" type="button">Send test email</button>
+        </aside>
+
+        <section class="editor-panel">
+          <div class="panel-heading">
+            <span class="eyebrow">My tasks</span>
+            <button id="addTask" class="secondary-button" type="button">Add task</button>
+          </div>
+          <div id="taskEditor" class="task-editor"></div>
+        </section>
+      </section>
+    </main>
+
+    <script src="platform.js"></script>
+  </body>
+</html>
