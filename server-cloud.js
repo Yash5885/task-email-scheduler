@@ -1,6 +1,10 @@
+Replace your entire `server-cloud.js` with this:
+
+```js
 'use strict';
-const dns = require('dns');
+
 const crypto = require('crypto');
+const dns = require('dns');
 const fs = require('fs');
 const http = require('http');
 const https = require('https');
@@ -156,6 +160,7 @@ async function handleApi(request, response, url) {
 
     const body = await readJsonBody(request);
     const email = String(body.email || '').trim().toLowerCase();
+
     if (!email || !email.includes('@')) {
       const error = new Error('Enter a valid email');
       error.statusCode = 400;
@@ -168,6 +173,7 @@ async function handleApi(request, response, url) {
       name: email.split('@')[0],
       picture: ''
     });
+
     seedDefaultScheduleIfNeeded(user.id);
     setSessionCookie(response, user.id);
     sendJson(response, 200, getUserPayload(user.id));
@@ -182,10 +188,12 @@ async function handleApi(request, response, url) {
 
   if (request.method === 'GET' && url.pathname === '/api/me') {
     const userId = getSessionUserId(request);
+
     if (!userId) {
       sendJson(response, 200, { authenticated: false });
       return true;
     }
+
     sendJson(response, 200, { authenticated: true, ...getUserPayload(userId) });
     return true;
   }
@@ -207,8 +215,10 @@ async function handleApi(request, response, url) {
   if (request.method === 'POST' && url.pathname === '/api/send-test-email') {
     const userId = requireSession(request);
     const user = db.prepare('SELECT id, email, name FROM users WHERE id = ?').get(userId);
+
     try {
       ensureSmtpConfigured();
+
       await sendSmtpMail({
         from: smtpSettings.from,
         to: user.email,
@@ -223,10 +233,13 @@ async function handleApi(request, response, url) {
           'Your task reminders will arrive here when a task is about to start.'
         ].join('\n')
       });
+
       sendJson(response, 200, { ok: true });
     } catch (error) {
+      console.error(error);
       sendJson(response, 400, { error: friendlyEmailError(error) });
     }
+
     return true;
   }
 
@@ -235,17 +248,21 @@ async function handleApi(request, response, url) {
 
 function upsertUser(profile) {
   const existing = db.prepare('SELECT * FROM users WHERE google_sub = ? OR email = ?').get(profile.sub, profile.email);
+
   if (existing) {
     db.prepare(
       'UPDATE users SET google_sub = ?, email = ?, name = ?, picture = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
     ).run(profile.sub, profile.email, profile.name || '', profile.picture || '', existing.id);
+
     return db.prepare('SELECT * FROM users WHERE id = ?').get(existing.id);
   }
 
   const result = db.prepare(
     'INSERT INTO users (google_sub, email, name, picture) VALUES (?, ?, ?, ?)'
   ).run(profile.sub, profile.email, profile.name || '', profile.picture || '');
+
   db.prepare('INSERT INTO user_settings (user_id) VALUES (?)').run(result.lastInsertRowid);
+
   return db.prepare('SELECT * FROM users WHERE id = ?').get(result.lastInsertRowid);
 }
 
@@ -261,6 +278,7 @@ function seedDefaultScheduleIfNeeded(userId) {
   `);
 
   db.exec('BEGIN');
+
   try {
     tasks.forEach((task, index) => {
       insert.run(
@@ -275,6 +293,7 @@ function seedDefaultScheduleIfNeeded(userId) {
         index
       );
     });
+
     db.exec('COMMIT');
   } catch (error) {
     db.exec('ROLLBACK');
@@ -289,6 +308,7 @@ function readDefaultTasks() {
 
 function getUserPayload(userId) {
   const user = db.prepare('SELECT id, email, name, picture FROM users WHERE id = ?').get(userId);
+
   if (!user) {
     const error = new Error('Session user not found');
     error.statusCode = 401;
@@ -329,6 +349,7 @@ function saveSchedule(userId, body) {
   const tasks = sanitizeTasks(body.tasks || []);
 
   db.exec('BEGIN');
+
   try {
     db.prepare(
       `UPDATE user_settings
@@ -337,6 +358,7 @@ function saveSchedule(userId, body) {
     ).run(settings.enabled ? 1 : 0, settings.leadMinutes, settings.timeZone, userId);
 
     db.prepare('DELETE FROM user_tasks WHERE user_id = ?').run(userId);
+
     const insert = db.prepare(`
       INSERT INTO user_tasks
         (user_id, task_id, title, category, start_time, end_time, focus, checklist_json, position)
@@ -407,7 +429,9 @@ function sanitizeTasks(value) {
 
 function isClock(value) {
   if (!/^\d{1,2}:\d{2}$/.test(value)) return false;
+
   const [hour, minute] = value.split(':').map(Number);
+
   return hour >= 0 && hour <= 24 && minute >= 0 && minute <= 59;
 }
 
@@ -434,6 +458,7 @@ async function verifyGoogleCredential(credential) {
 
   const token = String(credential || '');
   const parts = token.split('.');
+
   if (parts.length !== 3) {
     const error = new Error('Invalid Google credential');
     error.statusCode = 401;
@@ -474,8 +499,10 @@ async function verifyGoogleCredential(credential) {
 
 async function getGooglePublicKey(kid) {
   const now = Date.now();
+
   if (jwksCache.expiresAt < now || !jwksCache.keys.length) {
     const { body, maxAgeSeconds } = await httpsJson('https://www.googleapis.com/oauth2/v3/certs');
+
     jwksCache = {
       expiresAt: now + Math.max(60, maxAgeSeconds || 3600) * 1000,
       keys: body.keys || []
@@ -483,6 +510,7 @@ async function getGooglePublicKey(kid) {
   }
 
   const jwk = jwksCache.keys.find((key) => key.kid === kid);
+
   if (!jwk) {
     const error = new Error('Google signing key not found');
     error.statusCode = 401;
@@ -498,9 +526,11 @@ function httpsJson(url) {
       .get(url, (res) => {
         let data = '';
         res.setEncoding('utf8');
+
         res.on('data', (chunk) => {
           data += chunk;
         });
+
         res.on('end', () => {
           try {
             const cacheControl = String(res.headers['cache-control'] || '');
@@ -531,6 +561,7 @@ function requireSession(request) {
 function getSessionUserId(request) {
   const cookies = parseCookies(request.headers.cookie || '');
   const session = verifySession(cookies.session || '');
+
   return session ? session.userId : null;
 }
 
@@ -539,7 +570,9 @@ function setSessionCookie(response, userId) {
     userId,
     exp: Math.floor(Date.now() / 1000) + SESSION_MAX_AGE_SECONDS
   };
+
   const session = signSession(payload);
+
   response.setHeader(
     'Set-Cookie',
     `session=${session}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${SESSION_MAX_AGE_SECONDS}`
@@ -553,16 +586,20 @@ function clearSessionCookie(response) {
 function signSession(payload) {
   const encoded = base64UrlEncode(Buffer.from(JSON.stringify(payload)));
   const signature = hmac(encoded);
+
   return `${encoded}.${signature}`;
 }
 
 function verifySession(value) {
   const [encoded, signature] = String(value || '').split('.');
+
   if (!encoded || !signature || hmac(encoded) !== signature) return null;
 
   try {
     const payload = JSON.parse(base64UrlDecode(encoded).toString('utf8'));
+
     if (!payload.exp || payload.exp < Math.floor(Date.now() / 1000)) return null;
+
     return payload;
   } catch {
     return null;
@@ -601,6 +638,7 @@ async function checkAllReminders(reason) {
         WHERE user_settings.enabled = 1`
     )
     .all();
+
   let sent = 0;
 
   if (!isSmtpConfigured()) {
@@ -609,8 +647,10 @@ async function checkAllReminders(reason) {
 
   for (const user of users) {
     const due = remindersDueForUser(user, new Date());
+
     for (const item of due) {
       if (wasReminderSent(user.id, item.task.id, item.key)) continue;
+
       await sendTaskEmail(user, item.task, user.leadMinutes);
       markReminderSent(user.id, item.task.id, item.key);
       sent += 1;
@@ -627,16 +667,21 @@ function isSmtpConfigured() {
 function maskEmail(email) {
   const value = String(email || '');
   const [name, domain] = value.split('@');
+
   if (!name || !domain) return value ? 'configured' : '';
+
   return `${name.slice(0, 2)}***@${domain}`;
 }
 
 function ensureSmtpConfigured() {
   if (isSmtpConfigured()) return;
+
   const error = new Error(
     'Company sender is not configured. Set COMPANY_SMTP_USER, COMPANY_SMTP_PASSWORD, and COMPANY_EMAIL_FROM on the server.'
   );
+
   error.statusCode = 400;
+
   throw error;
 }
 
@@ -655,6 +700,10 @@ function friendlyEmailError(error) {
     return `${message}. Render may not be able to reach the SMTP host/port, or the SMTP host/port is wrong.`;
   }
 
+  if (message.includes('Invalid IP address')) {
+    return 'SMTP DNS lookup failed. Redeploy the latest server-cloud.js with the IPv4 pre-resolve fix.';
+  }
+
   if (message.includes('Company sender is not configured')) {
     return message;
   }
@@ -671,6 +720,7 @@ function remindersDueForUser(user, now) {
     .map((task) => {
       const reminderMinutes = normalizeMinutes(parseClock(task.start) - user.leadMinutes);
       const diff = normalizeMinutes(nowMinutes - reminderMinutes);
+
       return {
         task,
         key: `${local.year}-${local.month}-${local.day}:${task.id}:${user.leadMinutes}`,
@@ -723,6 +773,7 @@ function minutesToLabel(minutes) {
   const minute = normalized % 60;
   const suffix = hour24 >= 12 ? 'PM' : 'AM';
   const hour12 = hour24 % 12 || 12;
+
   return `${hour12}:${String(minute).padStart(2, '0')} ${suffix}`;
 }
 
@@ -761,6 +812,7 @@ function buildRawEmail({ from, to, subject, body }) {
     'Content-Type: text/plain; charset="UTF-8"',
     'Content-Transfer-Encoding: 8bit'
   ];
+
   return `${headers.join('\r\n')}\r\n\r\n${dotStuff(body)}`;
 }
 
@@ -774,15 +826,15 @@ function dotStuff(body) {
 }
 
 async function sendSmtpMail({ from, to, username, password, subject, body }) {
+  const { address } = await dns.promises.lookup(smtpSettings.host, { family: 4 });
+
   const socket = tls.connect({
-  host: smtpSettings.host,
-  port: smtpSettings.port,
-  servername: smtpSettings.host,
-  rejectUnauthorized: true,
-  lookup(hostname, options, callback) {
-    dns.lookup(hostname, { family: 4 }, callback);
-  }
-});
+    host: address,
+    port: smtpSettings.port,
+    servername: smtpSettings.host,
+    rejectUnauthorized: true
+  });
+
   const reader = createSmtpReader(socket);
 
   await new Promise((resolve, reject) => {
@@ -790,16 +842,19 @@ async function sendSmtpMail({ from, to, username, password, subject, body }) {
       reject(new Error(`Could not connect to ${smtpSettings.host}:${smtpSettings.port}`));
       socket.destroy();
     }, 20000);
+
     socket.once('secureConnect', () => {
       clearTimeout(timer);
       resolve();
     });
+
     socket.once('error', reject);
   });
 
   async function command(line, allowedCodes, label) {
     socket.write(`${line}\r\n`);
     const smtpResponse = await reader.read();
+
     if (!allowedCodes.includes(smtpResponse.code)) {
       throw new Error(`${label} failed with SMTP ${smtpResponse.code}: ${smtpResponse.text}`);
     }
@@ -807,15 +862,29 @@ async function sendSmtpMail({ from, to, username, password, subject, body }) {
 
   try {
     const greeting = await reader.read();
-    if (greeting.code !== 220) throw new Error(`Greeting failed with SMTP ${greeting.code}: ${greeting.text}`);
+
+    if (greeting.code !== 220) {
+      throw new Error(`Greeting failed with SMTP ${greeting.code}: ${greeting.text}`);
+    }
+
     await command('EHLO task-email-scheduler', [250], 'EHLO');
-    await command(`AUTH PLAIN ${Buffer.from(`\u0000${username}\u0000${password}`).toString('base64')}`, [235], 'AUTH');
+    await command(
+      `AUTH PLAIN ${Buffer.from(`\u0000${username}\u0000${password}`).toString('base64')}`,
+      [235],
+      'AUTH'
+    );
     await command(`MAIL FROM:<${from}>`, [250], 'MAIL FROM');
     await command(`RCPT TO:<${to}>`, [250, 251], 'RCPT TO');
     await command('DATA', [354], 'DATA');
+
     socket.write(`${buildRawEmail({ from, to, subject, body })}\r\n.\r\n`);
+
     const result = await reader.read();
-    if (result.code !== 250) throw new Error(`Send message failed with SMTP ${result.code}: ${result.text}`);
+
+    if (result.code !== 250) {
+      throw new Error(`Send message failed with SMTP ${result.code}: ${result.text}`);
+    }
+
     await command('QUIT', [221], 'QUIT');
   } finally {
     socket.end();
@@ -829,9 +898,14 @@ function createSmtpReader(socket) {
 
   socket.on('data', (chunk) => {
     partial += chunk.toString('utf8');
+
     const parts = partial.split(/\r?\n/);
     partial = parts.pop() || '';
-    for (const line of parts) if (line) lines.push(line);
+
+    for (const line of parts) {
+      if (line) lines.push(line);
+    }
+
     flush();
   });
 
@@ -840,6 +914,7 @@ function createSmtpReader(socket) {
 
   function rejectPending(error) {
     if (!pending) return;
+
     const current = pending;
     pending = null;
     clearTimeout(current.timer);
@@ -848,19 +923,27 @@ function createSmtpReader(socket) {
 
   function flush() {
     if (!pending || !lines.length) return;
+
     const last = lines[lines.length - 1];
     if (!/^\d{3} /.test(last)) return;
+
     const responseLines = lines;
     lines = [];
+
     const current = pending;
     pending = null;
     clearTimeout(current.timer);
-    current.resolve({ code: Number(last.slice(0, 3)), text: responseLines.join('\n') });
+
+    current.resolve({
+      code: Number(last.slice(0, 3)),
+      text: responseLines.join('\n')
+    });
   }
 
   return {
     read(timeoutMs = 20000) {
       if (pending) return Promise.reject(new Error('SMTP reader already waiting'));
+
       return new Promise((resolve, reject) => {
         pending = {
           resolve,
@@ -870,6 +953,7 @@ function createSmtpReader(socket) {
             reject(new Error('SMTP response timed out'));
           }, timeoutMs)
         };
+
         flush();
       });
     }
@@ -878,23 +962,28 @@ function createSmtpReader(socket) {
 
 function sendJson(response, statusCode, payload) {
   const body = JSON.stringify(payload, null, 2);
+
   response.writeHead(statusCode, {
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': 'no-store'
   });
+
   response.end(body);
 }
 
 function readJsonBody(request) {
   return new Promise((resolve, reject) => {
     let body = '';
+
     request.on('data', (chunk) => {
       body += chunk;
+
       if (body.length > 1024 * 1024) {
         reject(new Error('Request body is too large'));
         request.destroy();
       }
     });
+
     request.on('end', () => {
       try {
         resolve(JSON.parse(body || '{}'));
@@ -904,6 +993,7 @@ function readJsonBody(request) {
         reject(error);
       }
     });
+
     request.on('error', reject);
   });
 }
@@ -926,10 +1016,12 @@ function serveStatic(request, response, url) {
       response.end('Not found');
       return;
     }
+
     response.writeHead(200, {
       'Content-Type': mimeType(filePath),
       'Cache-Control': 'no-store'
     });
+
     response.end(data);
   });
 }
@@ -945,3 +1037,4 @@ function mimeType(filePath) {
     }[path.extname(filePath).toLowerCase()] || 'application/octet-stream'
   );
 }
+```
